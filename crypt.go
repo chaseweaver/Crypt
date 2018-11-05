@@ -25,6 +25,7 @@ var (
 	encryptNames  bool = true
 	keepExtension bool = true
 	hasExtension  bool = true
+	logOutput     bool = true
 )
 
 func main() {
@@ -212,6 +213,12 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 
 	case "keepExtensionUnchecked":
 		keepExtension = false
+
+	case "logOutputChecked":
+		logOutput = true
+
+	case "logOutputUnchecked":
+		logOutput = false
 	}
 
 	// Returns successful pass

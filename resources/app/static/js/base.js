@@ -60,3 +60,11 @@ function keepExtension(cb) {
 		astilectron.sendMessage({name: 'keepExtensionUnchecked', payload: key})
 	}
 }
+
+function logOutput(cb) {
+	if (cb.checked) {
+		astilectron.sendMessage({name: 'logOutputChecked', payload: key})
+	} else {
+		astilectron.sendMessage({name: 'logOutputUnchecked', payload: key})
+	}
+}
