@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 )
@@ -48,7 +49,7 @@ func decryptAESFile(code, key []byte) ([]byte, error) {
 
 	// Returns if the ciphertext is too short
 	if len(code) < aes.BlockSize {
-		return nil, nil
+		return nil, errors.New("Ciphertext is too short!")
 	}
 
 	iv := code[:aes.BlockSize]
@@ -92,7 +93,7 @@ func decryptMessage(ext string, key []byte) (string, error) {
 
 	// Returns if the ciphertext is too short
 	if len(ct) < aes.BlockSize {
-		return "", nil
+		return "", errors.New("Ciphertext is too short!")
 	}
 
 	iv := ct[:aes.BlockSize]
