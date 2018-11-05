@@ -113,18 +113,18 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 			}
 		}
 
-		// Writes file to original directory with encrypted name
-		if err = ioutil.WriteFile(fileDir+name, encryptedData, 0644); err != nil {
-			payload = err.Error()
-			return
-		}
-
 		// Deletes original file if a copy is not requested
 		if !createCopy {
 			if err = os.Remove(fileDir + fileName); err != nil {
 				payload = err.Error()
 				return
 			}
+		}
+
+		// Writes file to original directory with encrypted name
+		if err = ioutil.WriteFile(fileDir+name, encryptedData, 0644); err != nil {
+			payload = err.Error()
+			return
 		}
 
 	case "decrypt":
@@ -160,17 +160,18 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 			return
 		}
 
-		// Writes file to original directory with decrypted name
-		if err = ioutil.WriteFile(fileDir+name, decryptedData, 0644); err != nil {
-			return
-		}
-
 		// Deletes original file if a copy is not requested
 		if !createCopy {
 			if err = os.Remove(fileDir + fileName); err != nil {
 				payload = err.Error()
 				return
 			}
+		}
+
+		// Writes file to original directory with decrypted name
+		if err = ioutil.WriteFile(fileDir+name, decryptedData, 0644); err != nil {
+			payload = err.Error()
+			return
 		}
 
 	case "createCopyChecked":

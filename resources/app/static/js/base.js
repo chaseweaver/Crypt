@@ -30,7 +30,7 @@ document.addEventListener('astilectron-ready', function() {
 	document.getElementById('decrypt').addEventListener('click', function() {
 		let key = document.getElementById('key').value;
 		if (key !== "") {
-			astilectron.sendMessage({name: 'Mdecrypt', payload: key})
+			astilectron.sendMessage({name: 'decrypt', payload: key})
 		} else {
 			astilectron.showErrorBox('Missing Password!', 'Please enter a password before trying to decrypt.');
 		}
