@@ -1,4 +1,12 @@
 {
   "app_name": "Crypt",
-  "output_path": "output"
+  "output_path": "releases",
+  "environments": [
+    {"arch": "amd64", "os": "darwin"},
+    {"arch": "amd64", "os": "linux"},
+    {"arch": "386", "os": "windows"}
+  ],
+  "icon_path_darwin": "resources/crypt-logo.icns",
+  "icon_path_linux": "resources/crypt-logo.png",
+  "icon_path_windows": "resources/crypt-logo.ico"
 }

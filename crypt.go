@@ -33,8 +33,6 @@ func main() {
 		AssetDir: AssetDir,
 		AstilectronOptions: astilectron.Options{
 			AppName: appName,
-			//AppIconDarwinPath: "resources/icon.icns",
-			//AppIconDefaultPath: "resources/icon.png",
 		},
 		RestoreAssets: RestoreAssets,
 		Windows: []*bootstrap.Window{{
