@@ -14,14 +14,17 @@ import (
 )
 
 var (
-	window       *astilectron.Window
-	fileName     string
-	fileDir      string
-	file         string
-	appName      string
-	builtAt      string
-	createCopy   bool = false
-	encryptNames bool = true
+	window        *astilectron.Window
+	fileExt       string
+	fileName      string
+	fileDir       string
+	file          string
+	appName       string
+	builtAt       string
+	createCopy    bool = false
+	encryptNames  bool = true
+	keepExtension bool = true
+	hasExtension  bool = true
 )
 
 func main() {
@@ -72,11 +75,17 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 			return
 		}
 
-		// Split file, directory
+		// Split file, directory, extension
 		re := regexp.MustCompile(`(?m)[^/]+$`)
 		fileDir = path[:re.FindStringIndex(path)[0]]
 		fileName = path[re.FindStringIndex(path)[0]:]
 		file = path
+
+		re = regexp.MustCompile(`(?m)[^.]+$`)
+		fileExt = path[re.FindStringIndex(path)[0]:]
+		if len(fileExt) == 0 {
+			hasExtension = false
+		}
 
 	case "encrypt":
 		var pwd string
@@ -121,8 +130,14 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 			}
 		}
 
+		// Option to keep original extension
+		finalName := fileDir + name
+		if encryptNames && keepExtension && hasExtension {
+			finalName = fileDir + name + "." + fileExt
+		}
+
 		// Writes file to original directory with encrypted name
-		if err = ioutil.WriteFile(fileDir+name, encryptedData, 0644); err != nil {
+		if err = ioutil.WriteFile(finalName, encryptedData, 0644); err != nil {
 			payload = err.Error()
 			return
 		}
@@ -153,8 +168,14 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 			return
 		}
 
-		// Decrypts file name with same hashed password, will be the original unless renamed
+		// Decrypts file name with same hashed password,
+		// will be the original unless renamed, option to remove extension
 		name := fileName
+		if hasExtension {
+			re := regexp.MustCompile(`(?m)[^.]+$`)
+			name = fileName[:re.FindStringIndex(fileName)[0]]
+		}
+
 		if name, err = decryptMessage(fileName, key); err != nil {
 			payload = err.Error()
 			return
@@ -185,6 +206,12 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 
 	case "encryptNamesUnchecked":
 		encryptNames = false
+
+	case "keepExtensionChecked":
+		keepExtension = true
+
+	case "keepExtensionUnchecked":
+		keepExtension = false
 	}
 
 	// Returns successful pass

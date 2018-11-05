@@ -52,3 +52,11 @@ function encryptNames(cb) {
 		astilectron.sendMessage({name: 'encryptNamesUnchecked', payload: key})
 	}
 }
+
+function keepExtension(cb) {
+	if (cb.checked) {
+		astilectron.sendMessage({name: 'keepExtensionChecked', payload: key})
+	} else {
+		astilectron.sendMessage({name: 'keepExtensionUnchecked', payload: key})
+	}
+}
