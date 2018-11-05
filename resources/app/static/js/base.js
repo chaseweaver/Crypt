@@ -12,59 +12,44 @@ document.addEventListener('astilectron-ready', function() {
 	});
 
 	document.getElementById('file').addEventListener('click', function() {
-		astilectron.showOpenDialog({properties: ['openFile', 'singleSelection'], title: 'File(s) to Encrypt/Decrypt'}, function(paths) {
-			astilectron.sendMessage({name: 'open-file', payload: paths[0]});
-			document.getElementById('path').innerHTML = paths[0];
+		astilectron.showOpenDialog({properties: ['openFile', 'singleSelection'],
+			title: 'File(s) to Encrypt/Decrypt'}, function(paths) {
+				astilectron.sendMessage({name: 'open-file', payload: paths[0]});
+				document.getElementById('path').innerHTML = paths[0];
 		});
 	});
 
 	document.getElementById('encrypt').addEventListener('click', function() {
 		let key = document.getElementById('key').value;
-		if (key !== "") {
-			astilectron.sendMessage({name: 'encrypt', payload: key})
-		} else {
-			astilectron.showErrorBox('Missing Password!', 'Please enter a password before trying to encrypt.');
-		}
+		key !== "" ? astilectron.sendMessage({name: 'encrypt', payload: key})
+			: astilectron.showErrorBox('Missing Password!', 'Please enter a password before trying to encrypt.');
+			document.getElementById('path').innerHTML = "...";
 	});
 
 	document.getElementById('decrypt').addEventListener('click', function() {
 		let key = document.getElementById('key').value;
-		if (key !== "") {
-			astilectron.sendMessage({name: 'decrypt', payload: key})
-		} else {
-			astilectron.showErrorBox('Missing Password!', 'Please enter a password before trying to decrypt.');
-		}
+		key !== "" ? astilectron.sendMessage({name: 'decrypt', payload: key})
+			: astilectron.showErrorBox('Missing Password!', 'Please enter a password before trying to decrypt.');
+			document.getElementById('path').innerHTML = "...";
 	});
 });
 
 function createCopy(cb) {
-	if (cb.checked) {
-		astilectron.sendMessage({name: 'createCopyChecked', payload: key})
-	} else {
-		astilectron.sendMessage({name: 'createCopyUnchecked', payload: key})
-	}
+	cb.checked ? astilectron.sendMessage({name: 'createCopyChecked'})
+		: astilectron.sendMessage({name: 'createCopyUnchecked'})
 }
 
 function encryptNames(cb) {
-	if (cb.checked) {
-		astilectron.sendMessage({name: 'encryptNamesChecked', payload: key})
-	} else {
-		astilectron.sendMessage({name: 'encryptNamesUnchecked', payload: key})
-	}
+	cb.checked ? astilectron.sendMessage({name: 'encryptNamesChecked'})
+		: astilectron.sendMessage({name: 'encryptNamesUnchecked'})
 }
 
 function keepExtension(cb) {
-	if (cb.checked) {
-		astilectron.sendMessage({name: 'keepExtensionChecked', payload: key})
-	} else {
-		astilectron.sendMessage({name: 'keepExtensionUnchecked', payload: key})
-	}
+	cb.checked ? astilectron.sendMessage({name: 'keepExtensionChecked'})
+		: astilectron.sendMessage({name: 'keepExtensionUnchecked'})
 }
 
 function logOutput(cb) {
-	if (cb.checked) {
-		astilectron.sendMessage({name: 'logOutputChecked', payload: key})
-	} else {
-		astilectron.sendMessage({name: 'logOutputUnchecked', payload: key})
-	}
+	cb.checked ? astilectron.sendMessage({name: 'logOutputChecked'})
+		: astilectron.sendMessage({name: 'logOutputUnchecked'})
 }
