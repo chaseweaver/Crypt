@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" type="text/css" href="static/css/base.css"/>
+		<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700" rel="stylesheet">
+		<script type="text/javascript" src="static/js/base.js"></script>
+	</head>
+	<body>
+		<div class="full-container">
+			<div class="frame-container">
+				<div class="frame-button close" id="close"></div>
+				<div class="frame-button dev-tools" id="dev-tools"></div>
+			</div>
+			<div class="title-container">
+				<h1>Crypt</h1>
+			</div>
+			<div class="logo-container">
+				<img src="static/img/crypt-logo.svg">
+			</div>
+			<div class="button-container">
+				<div class="button set" id="file">File</div>
+				<div class="button set" id="dir">Directory</div>
+			</div>
+			<div class="box-container">
+				<div class="box">
+					<input type="checkbox" name="create-copy" value="Create Copy">
+					<span class="box">Create Copy</span>
+					<input type="checkbox" name="encrypt-names" value="Encrypt Names">
+					<span class="box">Encrypt Names</span>
+				</div>
+				<div class="divider-line"></div>
+				<div class="box">
+					<input type="checkbox" name="create-copy" value="Create Copy">
+					<span class="box">Create Copy</span>
+					<input type="checkbox" name="encrypt-names" value="Encrypt Names">
+					<span class="box">Encrypt Names</span>
+				</div>
+			</div>
+			<div class="textbox-container">
+				<form>
+					<h2 id="path" style="font-size: 14pt;">. . .</h2>
+					<input type="text" id="key" value="Password">
+				</form>
+			</div>
+			<div class="button-container">
+				<div class="button enc" id="encrypt">Encrypt</div>
+				<div class="button dec" id="decrypt">Decrypt</div>
+			</div>
+			<div class="footer-container">
+				<img src="static/img/github-logo.svg">
+				<div class="divider-line"></div>
+				<a href="mailto:chase.weaver34@gmail.com?Subject=Crypt" target="_top">chase.wever34@gmail.com</a>
+			</div>
+		</div>
+	</body>
+</html>
