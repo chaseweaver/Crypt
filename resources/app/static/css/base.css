@@ -63,7 +63,8 @@ body {
 
 .title-container>h1 {
 	font-size: 32pt;
-	line-height: 25%;
+	margin-top: -1%;
+	margin-bottom: 5%;
 	color: #555;
 }
 

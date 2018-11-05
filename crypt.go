@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"io/ioutil"
+	"os"
 	"regexp"
 
 	astilectron "github.com/asticode/go-astilectron"
@@ -13,13 +14,14 @@ import (
 )
 
 var (
-	w        *astilectron.Window
-	debug    = flag.Bool("d", false, "enables the debug mode")
-	fileName string
-	fileDir  string
-	file     string
-	appName  string
-	builtAt  string
+	window       *astilectron.Window
+	fileName     string
+	fileDir      string
+	file         string
+	appName      string
+	builtAt      string
+	createCopy   bool = false
+	encryptNames bool = true
 )
 
 func main() {
@@ -34,11 +36,10 @@ func main() {
 			//AppIconDarwinPath: "resources/icon.icns",
 			//AppIconDefaultPath: "resources/icon.png",
 		},
-		Debug:         *debug,
 		RestoreAssets: RestoreAssets,
 		Windows: []*bootstrap.Window{{
 			Homepage:       "index.html",
-			MessageHandler: handleMessages,
+			MessageHandler: messageHandler,
 			Options: &astilectron.WindowOptions{
 				Transparent:    astilectron.PtrBool(true),
 				Title:          astilectron.PtrStr("Crypt"),
@@ -56,48 +57,138 @@ func main() {
 	}
 }
 
-// handleMessages handles messages
-func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
+// messageHandler (astilectron.Window, bootstrap.MessageIn) (interface{}, error)
+// Handles returned messages from JS client, returns errors, success
+func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
 	switch m.Name {
 	case "close":
-		w.Close()
+		// Closes program window
+		window.Close()
+
 	case "open-file":
 		var path string
+
+		// Unmarshal JSON string
 		if err = json.Unmarshal(m.Payload, &path); err != nil {
 			payload = err.Error()
+			return
 		}
+
+		// Split file, directory
 		re := regexp.MustCompile(`(?m)[^/]+$`)
 		fileDir = path[:re.FindStringIndex(path)[0]]
 		fileName = path[re.FindStringIndex(path)[0]:]
 		file = path
+
 	case "encrypt":
 		var pwd string
+
+		// Unmarshal JSON string
 		if err = json.Unmarshal(m.Payload, &pwd); err != nil {
 			payload = err.Error()
 			return
 		}
+
+		// Hash key from recieved password
 		key := []byte(createHash(pwd))
-		encryptedFile, _ := ioutil.ReadFile(file)
-		encryptedData := encryptAESFile(encryptedFile, key)
-		encryptedName := encryptExtension(fileName, key)
-		err = ioutil.WriteFile(fileDir+encryptedName, encryptedData, 0644)
-		if err != nil {
+
+		// Reads file byte data
+		var encryptedFile []byte
+		if encryptedFile, err = ioutil.ReadFile(file); err != nil {
+			payload = err.Error()
 			return
 		}
+
+		// Encrypts file byte data with hashed password
+		var encryptedData []byte
+		if encryptedData, err = encryptAESFile(encryptedFile, key); err != nil {
+			payload = err.Error()
+			return
+		}
+
+		// Encrypts original file name with same hashed password
+		name := fileName
+		if encryptNames {
+			if name, err = encryptMessage(fileName, key); err != nil {
+				payload = err.Error()
+				return
+			}
+		}
+
+		// Writes file to original directory with encrypted name
+		if err = ioutil.WriteFile(fileDir+name, encryptedData, 0644); err != nil {
+			payload = err.Error()
+			return
+		}
+
+		// Deletes original file if a copy is not requested
+		if !createCopy {
+			if err = os.Remove(fileDir + fileName); err != nil {
+				payload = err.Error()
+				return
+			}
+		}
+
 	case "decrypt":
 		var pwd string
+
+		// Unmarshal JSON string
 		if err = json.Unmarshal(m.Payload, &pwd); err != nil {
 			payload = err.Error()
 			return
 		}
+
+		// Hash key from recieved password
 		key := []byte(createHash(pwd))
-		decryptedFile, _ := ioutil.ReadFile(file)
-		decryptedData := decryptAESFile(decryptedFile, key)
-		decryptedName := decryptExtension(fileName, key)
-		err = ioutil.WriteFile(fileDir+decryptedName, decryptedData, 0644)
-		if err != nil {
+
+		// Reads file byte data
+		var decryptedFile []byte
+		if decryptedFile, err = ioutil.ReadFile(file); err != nil {
+			payload = err.Error()
 			return
 		}
+
+		// Decrypts file byte data with hashed password
+		var decryptedData []byte
+		if decryptedData, err = decryptAESFile(decryptedFile, key); err != nil {
+			payload = err.Error()
+			return
+		}
+
+		// Decrypts file name with same hashed password, will be the original unless renamed
+		name := fileName
+		if name, err = decryptMessage(fileName, key); err != nil {
+			payload = err.Error()
+			return
+		}
+
+		// Writes file to original directory with decrypted name
+		if err = ioutil.WriteFile(fileDir+name, decryptedData, 0644); err != nil {
+			return
+		}
+
+		// Deletes original file if a copy is not requested
+		if !createCopy {
+			if err = os.Remove(fileDir + fileName); err != nil {
+				payload = err.Error()
+				return
+			}
+		}
+
+	case "createCopyChecked":
+		createCopy = true
+
+	case "createCopyUnchecked":
+		createCopy = false
+
+	case "encryptNamesChecked":
+		encryptNames = true
+
+	case "encryptNamesUnchecked":
+		encryptNames = false
 	}
+
+	// Returns successful pass
+	payload = true
 	return
 }

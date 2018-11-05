@@ -35,4 +35,16 @@ document.addEventListener('astilectron-ready', function() {
 			astilectron.showErrorBox('Missing Password!', 'Please enter a password before trying to decrypt.');
 		}
 	});
+
+	if (document.getElementById('encrypt-names').checked) {
+		astilectron.sendMessage({name: 'encryptNamesChecked', payload: key})
+	} else {
+		astilectron.sendMessage({name: 'encryptNamesUnchecked', payload: key})
+	}
+
+	if (document.getElementById('create-copy').checked) {
+		astilectron.sendMessage({name: 'createCopyChecked', payload: key})
+	} else {
+		astilectron.sendMessage({name: 'createCopyUnchecked', payload: key})
+	}
 });
