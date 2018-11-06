@@ -1,6 +1,6 @@
 document.addEventListener('astilectron-ready', function() {
 
-	document.getElementById('console-box').innerHTML = 'Crypt is an open-source AES-256 file encryption program.\n\n1. Select File / Directory\n2. Choose options\n3. Enter password\n4. Encrypt / Decrypt\n\ngithub.com/chaseweaver/Crypt\nchase.weaver34@gmail.com'
+	document.getElementById('console-box').innerHTML = 'Crypt is an open-source AES-256 file encryption program.\n\n1. Select File / Directory\n2. Choose options\n3. Enter password\n4. Encrypt / Decrypt\n\ngithub.com/chaseweaver/Crypt\nchase.weaver34@gmail.com\n\n'
 
 	astilectron.onMessage(function(message) {
 		console.log(message);
@@ -27,6 +27,12 @@ document.addEventListener('astilectron-ready', function() {
 		});
 	});
 
+	document.getElementById('dir').addEventListener('click', function() {
+		astilectron.showOpenDialog({properties: ['openDirectory', 'singleSelection'],
+			title: 'Dir(s) to Encrypt/Decrypt'}, function(paths) {
+				astilectron.sendMessage({name: 'open-dir', payload: paths[0]});
+		});
+	});
 	document.getElementById('encrypt').addEventListener('click', function() {
 		let key = document.getElementById('password-box').value;
 		key !== '' ? astilectron.sendMessage({name: 'encrypt', payload: key})

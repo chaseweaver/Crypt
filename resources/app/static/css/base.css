@@ -122,27 +122,27 @@ body {
 }
 
 .set {
-	background-color:#4e9af1;
+	background-color:#61b2f5;
 }
 
 .set:hover {
-	background-color: #407abb;
+	background-color: #5398d1;
 }
 
 .enc {
-	background-color: rgb(79, 221, 138);
+	background-color: #61f5a4;
 }
 
 .enc:hover {
-	background-color: rgb(57, 161, 101);
+	background-color: #4fc383;
 }
 
 .dec {
-	background-color: rgb(221, 79, 79);
+	background-color: #ee6a5f;
 }
 
 .dec:hover {
-	background-color: rgb(177, 63, 63);
+	background-color: #cf5c52;
 }
 
 .box-container {

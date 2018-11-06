@@ -88,6 +88,15 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 			hasExtension = false
 		}
 
+	case "open-dir":
+		var path string
+
+		// Unmarshal JSON string
+		if err = json.Unmarshal(m.Payload, &path); err != nil {
+			payload = err.Error()
+			return
+		}
+
 	case "encrypt":
 		var pwd string
 
