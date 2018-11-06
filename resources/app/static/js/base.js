@@ -20,10 +20,12 @@ document.addEventListener('astilectron-ready', function() {
 	});
 
 	document.getElementById('file').addEventListener('click', function() {
-		astilectron.showOpenDialog({properties: ['openFile', 'singleSelection'],
+		astilectron.showOpenDialog({properties: ['openFile', 'multiSelections'],
 			title: 'File(s) to Encrypt/Decrypt'}, function(paths) {
-				astilectron.sendMessage({name: 'open-file', payload: paths[0]});
-				document.getElementById('console-box').value += 'Loaded: ' + paths[0] + '\n';
+				astilectron.sendMessage({name: 'open-file', payload: paths});
+				for (let i = 0; i < paths.length; i++) {
+					document.getElementById('console-box').value += 'Loaded: ' + paths[i] + '\n\n';
+				}
 		});
 	});
 
@@ -31,6 +33,7 @@ document.addEventListener('astilectron-ready', function() {
 		astilectron.showOpenDialog({properties: ['openDirectory', 'singleSelection'],
 			title: 'Dir(s) to Encrypt/Decrypt'}, function(paths) {
 				astilectron.sendMessage({name: 'open-dir', payload: paths[0]});
+				document.getElementById('console-box').value += 'Loaded: ' + paths[0] + '\n\n';
 		});
 	});
 	document.getElementById('encrypt').addEventListener('click', function() {

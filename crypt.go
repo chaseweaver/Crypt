@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -15,18 +16,24 @@ import (
 
 var (
 	window        *astilectron.Window
-	fileExt       string
-	fileName      string
-	fileDir       string
-	file          string
 	appName       string
 	builtAt       string
+	files         []File
 	createCopy    bool = false
 	encryptNames  bool = true
 	keepExtension bool = true
 	hasExtension  bool = true
 	logOutput     bool = true
 )
+
+type File struct {
+	fileName     string
+	fileExt      string
+	fileDir      string
+	path         string
+	isDir        bool
+	hasExtension bool
+}
 
 func main() {
 	flag.Parse()
@@ -68,24 +75,32 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 		window.Close()
 
 	case "open-file":
-		var path string
+		var path []string
 
 		// Unmarshal JSON string
-		if err = json.Unmarshal(m.Payload, &path); err != nil {
+		if err = json.Unmarshal([]byte(m.Payload), &path); err != nil {
 			payload = err.Error()
+			//return
+		}
+
+		if err = ioutil.WriteFile("/Users/chase/Desktop/log.txt", []byte(fmt.Sprintf("%v", path)), 0644); err != nil {
 			return
 		}
 
+		files = make([]File, len(path))
+
 		// Split file, directory, extension
 		re := regexp.MustCompile(`(?m)[^/]+$`)
-		fileDir = path[:re.FindStringIndex(path)[0]]
-		fileName = path[re.FindStringIndex(path)[0]:]
-		file = path
+		reg := regexp.MustCompile(`(?m)[^.]+$`)
 
-		re = regexp.MustCompile(`(?m)[^.]+$`)
-		fileExt = path[re.FindStringIndex(path)[0]:]
-		if len(fileExt) == 0 {
-			hasExtension = false
+		for i := 0; i < len(files); i++ {
+			files[i].fileDir = path[i][:re.FindStringIndex(path[i])[0]]
+			files[i].fileName = path[i][re.FindStringIndex(path[i])[0]:]
+			files[i].fileExt = path[i][reg.FindStringIndex(path[i])[0]:]
+			files[i].path = path[i]
+			if len(files[i].fileExt) == 0 {
+				files[i].hasExtension = false
+			}
 		}
 
 	case "open-dir":
@@ -109,47 +124,51 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 		// Hash key from recieved password
 		key := []byte(createHash(pwd))
 
-		// Reads file byte data
-		var encryptedFile []byte
-		if encryptedFile, err = ioutil.ReadFile(file); err != nil {
-			payload = err.Error()
-			return
-		}
+		// Loop through each file
+		for i := 0; i < len(files); i++ {
 
-		// Encrypts file byte data with hashed password
-		var encryptedData []byte
-		if encryptedData, err = encryptAESFile(encryptedFile, key); err != nil {
-			payload = err.Error()
-			return
-		}
-
-		// Encrypts original file name with same hashed password
-		name := fileName
-		if encryptNames {
-			if name, err = encryptMessage(fileName, key); err != nil {
+			// Reads file byte data
+			var encryptedFile []byte
+			if encryptedFile, err = ioutil.ReadFile(files[i].path); err != nil {
 				payload = err.Error()
 				return
 			}
-		}
 
-		// Deletes original file if a copy is not requested
-		if !createCopy {
-			if err = os.Remove(fileDir + fileName); err != nil {
+			// Encrypts file byte data with hashed password
+			var encryptedData []byte
+			if encryptedData, err = encryptAESFile(encryptedFile, key); err != nil {
 				payload = err.Error()
 				return
 			}
-		}
 
-		// Option to keep original extension
-		finalName := fileDir + name
-		if encryptNames && keepExtension && hasExtension {
-			finalName = fileDir + name + "." + fileExt
-		}
+			// Encrypts original file name with same hashed password
+			name := files[i].fileName
+			if encryptNames {
+				if name, err = encryptMessage(files[i].fileName, key); err != nil {
+					payload = err.Error()
+					return
+				}
+			}
 
-		// Writes file to original directory with encrypted name
-		if err = ioutil.WriteFile(finalName, encryptedData, 0644); err != nil {
-			payload = err.Error()
-			return
+			// Deletes original file if a copy is not requested
+			if !createCopy {
+				if err = os.Remove(files[i].fileDir + files[i].fileName); err != nil {
+					payload = err.Error()
+					return
+				}
+			}
+
+			// Option to keep original extension
+			finalName := files[i].fileDir + name
+			if encryptNames && keepExtension && files[i].hasExtension {
+				finalName = files[i].fileDir + name + "." + files[i].fileExt
+			}
+
+			// Writes file to original directory with encrypted name
+			if err = ioutil.WriteFile(finalName, encryptedData, 0644); err != nil {
+				payload = err.Error()
+				return
+			}
 		}
 
 	case "decrypt":
@@ -164,45 +183,49 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 		// Hash key from recieved password
 		key := []byte(createHash(pwd))
 
-		// Reads file byte data
-		var decryptedFile []byte
-		if decryptedFile, err = ioutil.ReadFile(file); err != nil {
-			payload = err.Error()
-			return
-		}
+		// Loop through each file
+		for i := 0; i < len(files); i++ {
 
-		// Decrypts file byte data with hashed password
-		var decryptedData []byte
-		if decryptedData, err = decryptAESFile(decryptedFile, key); err != nil {
-			payload = err.Error()
-			return
-		}
-
-		// Decrypts file name with same hashed password,
-		// will be the original unless renamed, option to remove extension
-		name := fileName
-		if hasExtension {
-			re := regexp.MustCompile(`(?m)[^.]+$`)
-			name = fileName[:re.FindStringIndex(fileName)[0]]
-		}
-
-		if name, err = decryptMessage(fileName, key); err != nil {
-			payload = err.Error()
-			return
-		}
-
-		// Deletes original file if a copy is not requested
-		if !createCopy {
-			if err = os.Remove(fileDir + fileName); err != nil {
+			// Reads file byte data
+			var decryptedFile []byte
+			if decryptedFile, err = ioutil.ReadFile(files[i].path); err != nil {
 				payload = err.Error()
 				return
 			}
-		}
 
-		// Writes file to original directory with decrypted name
-		if err = ioutil.WriteFile(fileDir+name, decryptedData, 0644); err != nil {
-			payload = err.Error()
-			return
+			// Decrypts file byte data with hashed password
+			var decryptedData []byte
+			if decryptedData, err = decryptAESFile(decryptedFile, key); err != nil {
+				payload = err.Error()
+				return
+			}
+
+			// Decrypts file name with same hashed password,
+			// will be the original unless renamed, option to remove extension
+			name := files[i].fileName
+			if files[i].hasExtension {
+				re := regexp.MustCompile(`(?m)[^.]+$`)
+				name = files[i].fileName[:re.FindStringIndex(files[i].fileName)[0]]
+			}
+
+			if name, err = decryptMessage(files[i].fileName, key); err != nil {
+				payload = err.Error()
+				return
+			}
+
+			// Deletes original file if a copy is not requested
+			if !createCopy {
+				if err = os.Remove(files[i].fileDir + files[i].fileName); err != nil {
+					payload = err.Error()
+					return
+				}
+			}
+
+			// Writes file to original directory with decrypted name
+			if err = ioutil.WriteFile(files[i].fileDir+name, decryptedData, 0644); err != nil {
+				payload = err.Error()
+				return
+			}
 		}
 
 	case "createCopyChecked":
