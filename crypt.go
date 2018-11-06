@@ -57,7 +57,7 @@ func main() {
 				HasShadow:       astilectron.PtrBool(false),
 				Fullscreenable:  astilectron.PtrBool(false),
 				Center:          astilectron.PtrBool(true),
-				Height:          astilectron.PtrInt(625),
+				Height:          astilectron.PtrInt(630),
 				Width:           astilectron.PtrInt(325),
 			},
 		}},
@@ -80,13 +80,10 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 		// Unmarshal JSON string
 		if err = json.Unmarshal([]byte(m.Payload), &path); err != nil {
 			payload = err.Error()
-			//return
-		}
-
-		if err = ioutil.WriteFile("/Users/chase/Desktop/log.txt", []byte(fmt.Sprintf("%v", path)), 0644); err != nil {
 			return
 		}
 
+		// Make new struct array
 		files = make([]File, len(path))
 
 		// Split file, directory, extension
