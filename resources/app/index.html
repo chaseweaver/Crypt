@@ -10,7 +10,8 @@
 		<div class="full-container">
 			<div class="frame-container">
 				<div class="frame-button close" id="close"></div>
-				<div class="frame-button dev-tools" id="dev-tools"></div>
+				<div class="frame-button console" id="console"></div>
+				<div class="frame-button info" id="info"></div>
 			</div>
 			<div class="title-container">
 				<h1>Crypt</h1>
@@ -37,19 +38,14 @@
 				</div>
 			</div>
 			<div class="textbox-container">
-				<form>
-					<h2 id="path" style="font-size: 14pt;">. . .</h2>
-					<input type="text" id="key" value="Password">
-				</form>
+				<input type="text" id="key" class="password-box" value="Password">
 			</div>
 			<div class="button-container">
 				<div class="button enc" id="encrypt">Encrypt</div>
 				<div class="button dec" id="decrypt">Decrypt</div>
 			</div>
-			<div class="footer-container">
-				<img src="static/img/github-logo.svg">
-				<div class="divider-line"></div>
-				<a href="mailto:chase.weaver34@gmail.com?Subject=Crypt" target="_top">chase.wever34@gmail.com</a>
+			<div class="textbox-container">
+				<textarea rows="6" id="console-box" class="console-box" readonly></textarea>
 			</div>
 		</div>
 	</body>
