@@ -10,12 +10,13 @@ document.addEventListener('astilectron-ready', function() {
 		astilectron.sendMessage({name: 'close'});
 	});
 
-	document.getElementById('console').addEventListener('click', function() {
-		astilectron.sendMessage({name: 'console'});
+	document.getElementById('toggle-password').addEventListener('click', function() {
+		let pwd = document.getElementById('password-box');
+    pwd.type === 'password' ? pwd.type = 'text' : pwd.type = 'password';
 	});
 
 	document.getElementById('info').addEventListener('click', function() {
-		astilectron.sendMessage({name: 'info'});
+		astilectron.showMessageBox({message: 'Crypt is an open-source AES-256 file encryption program written in golang. Find an error? Want to help? Check out the github page <github.com/chaseweaver/Crypt> for more information. Or, how about you email me? <chase.weaver34@gmail.com> Happy hacking.', title: 'Crypt'})
 	});
 
 	document.getElementById('file').addEventListener('click', function() {
@@ -27,14 +28,14 @@ document.addEventListener('astilectron-ready', function() {
 	});
 
 	document.getElementById('encrypt').addEventListener('click', function() {
-		let key = document.getElementById('key').value;
-		key !== "" ? astilectron.sendMessage({name: 'encrypt', payload: key})
+		let key = document.getElementById('password-box').value;
+		key !== '' ? astilectron.sendMessage({name: 'encrypt', payload: key})
 			: astilectron.showErrorBox('Missing Password!', 'Please enter a password before trying to encrypt.');
 	});
 
 	document.getElementById('decrypt').addEventListener('click', function() {
-		let key = document.getElementById('key').value;
-		key !== "" ? astilectron.sendMessage({name: 'decrypt', payload: key})
+		let key = document.getElementById('password-box').value;
+		key !== '' ? astilectron.sendMessage({name: 'decrypt', payload: key})
 			: astilectron.showErrorBox('Missing Password!', 'Please enter a password before trying to decrypt.');
 	});
 });

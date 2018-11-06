@@ -35,11 +35,11 @@ body {
 	background-color: #cf5c52;
 }
 
-.console {
+.toggle-password {
 	background-color: #61b2f5;
 }
 
-.console:hover {
+.toggle-password:hover {
 	background-color: #5398d1;
 }
 
@@ -171,7 +171,7 @@ input[type=checkbox] {
 	justify-content: center;
 }
 
-input[type=text], textarea {
+input[type=text], input[type=password], textarea {
 	border-color: white;
 	background-color: white;
 	border-style: solid;
