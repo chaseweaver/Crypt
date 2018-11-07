@@ -3,3 +3,4 @@ vendor
 Crypt
 bind*
 windows.syso
+resources/checksums.json
