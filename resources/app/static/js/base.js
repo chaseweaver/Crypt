@@ -1,6 +1,6 @@
 document.addEventListener('astilectron-ready', function() {
-
-	document.getElementById('console-box').innerHTML = 'Crypt is an open-source AES-256 file encryption program.\n\n1. Select File / Directory\n2. Choose options\n3. Enter password\n4. Encrypt / Decrypt\n\ngithub.com/chaseweaver/Crypt\nchase.weaver34@gmail.com\n\n'
+	let helpText = 'Crypt is an open-source AES-256 file encryption program.\n\n1. Select File / Directory\n2. Choose options\n3. Enter password\n4. Encrypt / Decrypt\n\ngithub.com/chaseweaver/Crypt\nchase.weaver34@gmail.com\n\n';
+	document.getElementById('console-box').innerHTML = helpText;
 
 	astilectron.onMessage(function(message) {
 		document.getElementById('console-box').innerHTML += message.name + '\n\n';
@@ -16,7 +16,7 @@ document.addEventListener('astilectron-ready', function() {
 	});
 
 	document.getElementById('info').addEventListener('click', function() {
-		astilectron.showMessageBox({message: 'Crypt is an open-source AES-256 file encryption program written in golang. Find an error? Want to help? Check out the github page <github.com/chaseweaver/Crypt> for more information. Or, how about you email me? <chase.weaver34@gmail.com> Happy hacking.', title: 'Crypt'})
+		astilectron.showMessageBox({message: 'Crypt is an open-source AES-256 file encryption program written in golang. Find an error? Want to help? Check out the github page <github.com/chaseweaver/Crypt> for more information. Or, how about you email me? <chase.weaver34@gmail.com> Happy hacking.', title: 'Crypt'});
 	});
 
 	document.getElementById('file').addEventListener('click', function() {
@@ -32,6 +32,20 @@ document.addEventListener('astilectron-ready', function() {
 				astilectron.sendMessage({name: 'open-dir', payload: paths[0]});
 		});
 	});
+
+	document.getElementById('log').addEventListener('click', function() {
+		let fs = require('fs');
+		let data = document.getElementById('console-box').value.replace(helpText, '');
+		astilectron.showSaveDialog({title: "Save Log"}, function(fileName) {
+			fs.writeFile(fileName, data, (err) => {
+        if (err) {
+					alert("An error ocurred creating the file "+ err.message)
+        }        
+        alert("The file has been succesfully saved");
+    	});
+		})
+	});
+
 	document.getElementById('encrypt').addEventListener('click', function() {
 		let key = document.getElementById('password-box').value;
 		key !== '' ? astilectron.sendMessage({name: 'encrypt', payload: key})
@@ -47,20 +61,20 @@ document.addEventListener('astilectron-ready', function() {
 
 function createCopy(cb) {
 	cb.checked ? astilectron.sendMessage({name: 'createCopyChecked'})
-		: astilectron.sendMessage({name: 'createCopyUnchecked'})
+		: astilectron.sendMessage({name: 'createCopyUnchecked'});
 }
 
 function encryptNames(cb) {
 	cb.checked ? astilectron.sendMessage({name: 'encryptNamesChecked'})
-		: astilectron.sendMessage({name: 'encryptNamesUnchecked'})
+		: astilectron.sendMessage({name: 'encryptNamesUnchecked'});
 }
 
 function keepExtension(cb) {
 	cb.checked ? astilectron.sendMessage({name: 'keepExtensionChecked'})
-		: astilectron.sendMessage({name: 'keepExtensionUnchecked'})
+		: astilectron.sendMessage({name: 'keepExtensionUnchecked'});
 }
 
 function logOutput(cb) {
 	cb.checked ? astilectron.sendMessage({name: 'logOutputChecked'})
-		: astilectron.sendMessage({name: 'logOutputUnchecked'})
+		: astilectron.sendMessage({name: 'logOutputUnchecked'});
 }
