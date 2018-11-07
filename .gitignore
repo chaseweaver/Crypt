@@ -1,3 +1,6 @@
 releases
+vendor
+Crypt
 bind*
 windows.syso
+resources/app/checksums.json

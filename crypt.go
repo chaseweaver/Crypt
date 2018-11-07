@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -14,7 +15,7 @@ import (
 )
 
 var (
-	window        *astilectron.Window
+	w             *astilectron.Window
 	appName       string
 	builtAt       string
 	files         []File
@@ -67,11 +68,11 @@ func main() {
 
 // messageHandler (astilectron.Window, bootstrap.MessageIn) (interface{}, error)
 // Handles returned messages from JS client, returns errors, success
-func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
+func messageHandler(w *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
 	switch m.Name {
 	case "close":
 		// Closes program window
-		window.Close()
+		w.Close()
 
 	case "open-file":
 		var path []string
@@ -96,6 +97,12 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 			files[i].path = path[i]
 			if len(files[i].fileExt) == 0 {
 				files[i].hasExtension = false
+			}
+
+			if logOutput {
+				if err := bootstrap.SendMessage(w, fmt.Sprintf("Loaded: %v", files[i].path), nil); err != nil {
+					payload = err.Error()
+				}
 			}
 		}
 
@@ -152,6 +159,12 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 					payload = err.Error()
 					return
 				}
+				// Log deleted file
+				if logOutput {
+					if err := bootstrap.SendMessage(w, fmt.Sprintf("Deleted: %v", files[i].path), nil); err != nil {
+						payload = err.Error()
+					}
+				}
 			}
 
 			// Option to keep original extension
@@ -164,6 +177,13 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 			if err = ioutil.WriteFile(finalName, encryptedData, 0644); err != nil {
 				payload = err.Error()
 				return
+			}
+
+			// Log results
+			if logOutput {
+				if err := bootstrap.SendMessage(w, fmt.Sprintf("Encrypted to: %v", finalName), nil); err != nil {
+					payload = err.Error()
+				}
 			}
 		}
 
@@ -215,12 +235,25 @@ func messageHandler(_ *astilectron.Window, m bootstrap.MessageIn) (payload inter
 					payload = err.Error()
 					return
 				}
+				// Log deleted file
+				if logOutput {
+					if err := bootstrap.SendMessage(w, fmt.Sprintf("Deleted: %v", files[i].path), nil); err != nil {
+						payload = err.Error()
+					}
+				}
 			}
 
 			// Writes file to original directory with decrypted name
 			if err = ioutil.WriteFile(files[i].fileDir+name, decryptedData, 0644); err != nil {
 				payload = err.Error()
 				return
+			}
+
+			// Log results
+			if logOutput {
+				if err := bootstrap.SendMessage(w, fmt.Sprintf("Decrypted to: %v", files[i].fileDir+name), nil); err != nil {
+					payload = err.Error()
+				}
 			}
 		}
 

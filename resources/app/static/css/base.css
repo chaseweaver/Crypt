@@ -109,7 +109,6 @@ body {
 	display: inline-block;
 	padding: 0.3em 1.2em;
 	margin: 0 0.1em 0.1em 0;
-	width: 30%;
 	border: 0.16em solid rgba(255,255,255,0);
 	border-radius: 0.2em;
 	text-decoration: none;
@@ -122,6 +121,7 @@ body {
 }
 
 .set {
+	width: 30%;
 	background-color:#61b2f5;
 }
 
@@ -130,6 +130,7 @@ body {
 }
 
 .enc {
+	width: 18%;
 	background-color: #61f5a4;
 }
 
@@ -138,11 +139,21 @@ body {
 }
 
 .dec {
+	width: 18%;
 	background-color: #ee6a5f;
 }
 
 .dec:hover {
 	background-color: #cf5c52;
+}
+
+.log {
+	width: 18%;
+	background-color: #8762ed;
+}
+
+.log:hover {
+	background-color: #7353cc;
 }
 
 .box-container {
