@@ -25,8 +25,6 @@ body {
 }
 
 .frame-button {
-	margin-top: 8px;
-	margin-left: 8px;
 	width: 12px;
 	height: 12px;
 	border-radius: 0.2em
@@ -34,6 +32,7 @@ body {
 
 .close {
 	background-color: #ee6a5f;
+	margin-left: 8px;
 }
 
 .close:hover {
@@ -42,6 +41,7 @@ body {
 
 .toggle-password {
 	background-color: #61b2f5;
+	margin-left: 8px;
 }
 
 .toggle-password:hover {
@@ -50,6 +50,7 @@ body {
 
 .info {
 	background-color: #61f5a4;
+	margin-left: 8px;
 }
 
 .info:hover {
@@ -59,9 +60,9 @@ body {
 .full-container {
 	width: 100%;
 	height: 100%;
-	margin: auto;
 	background-color: #f3f3f6;
 	border-radius: 0.2em;
+	padding-top: 2%;
 }
 
 .title-container {
@@ -102,7 +103,7 @@ body {
 	padding-bottom: 2%;
 	display: inline-flex;
 	flex-direction: row;
-	justify-content: space-around;
+	justify-content: space-between;
 }
 
 .button {
@@ -122,7 +123,7 @@ body {
 }
 
 .set {
-	width: 30%;
+	width: 34%;
 	background-color:#61b2f5;
 }
 
@@ -131,7 +132,7 @@ body {
 }
 
 .enc {
-	width: 18%;
+	width: 21.5%;
 	background-color: #61f5a4;
 }
 
@@ -140,7 +141,7 @@ body {
 }
 
 .dec {
-	width: 18%;
+	width: 21.5%;
 	background-color: #ee6a5f;
 }
 
@@ -149,7 +150,7 @@ body {
 }
 
 .log {
-	width: 8%;
+	width: 8.5%;
 	background-color: #9350ff;
 }
 
@@ -158,10 +159,8 @@ body {
 }
 
 .box-container {
-	margin-top: 2%;
 	width: 100%;
 	display: flex;
-	justify-content: space-around;
 }
 
 .box {
@@ -185,8 +184,7 @@ input[type=checkbox] {
 .textbox-container {
 	padding-top: 2%;
 	padding-bottom: 3%;
-	margin-left: 2%;
-	width: 95%;
+	width: 100%;
 	display: flex;
 	justify-content: center;
 }
@@ -209,9 +207,11 @@ input[type=text], input[type=password], textarea {
 }
 
 .console-box {
-	height: 104px;
+	height: 118px;
 	text-align: left;
 	padding-left: 3%;
+	padding-top: 2%;
+	-webkit-app-region: no-drag;
 }
 
 .divider-line {
