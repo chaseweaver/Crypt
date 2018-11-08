@@ -1,12 +1,12 @@
 package main
 
-// errorString
+// errorString struct
 // Used for implementation of an error message
 type errorString struct {
 	s string
 }
 
-// New(string)
+// New (string) error
 // Returns an error that formats as the given text
 func New(text string) error {
 	return &errorString{text}

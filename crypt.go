@@ -21,16 +21,16 @@ var (
 	w             *astilectron.Window
 	appName       string
 	builtAt       string
-	exp           []File
-	createCopy    bool = false
-	encryptNames  bool = true
-	keepExtension bool = true
-	hasExtension  bool = true
-	logOutput     bool = true
+	exp           []file
+	createCopy    = false
+	encryptNames  = true
+	keepExtension = true
+	hasExtension  = true
+	logOutput     = true
 )
 
 type (
-	File struct {
+	file struct {
 		fileName     string
 		fileExt      string
 		fileDir      string
@@ -88,7 +88,7 @@ func messageHandler(w *astilectron.Window, m bootstrap.MessageIn) (payload inter
 		}
 
 		// Make new struct array
-		exp = make([]File, len(path))
+		exp = make([]file, len(path))
 
 		// Split file, directory, extension
 		re := regexp.MustCompile(`(?m)[^/]+$`)
@@ -120,12 +120,12 @@ func messageHandler(w *astilectron.Window, m bootstrap.MessageIn) (payload inter
 			return
 		}
 
-		exp = make([]File, len(path))
+		exp = make([]file, len(path))
 		if err := filepath.Walk(path, func(p string, f os.FileInfo, err error) error {
 			re := regexp.MustCompile(`(?m)[^/]+$`)
 			reg := regexp.MustCompile(`(?m)[^.]+$`)
 
-			nf := File{
+			nf := file{
 				fileDir:  p[:re.FindStringIndex(p)[0]],
 				fileName: p[re.FindStringIndex(p)[0]:],
 				fileExt:  p[reg.FindStringIndex(p)[0]:],
@@ -271,7 +271,7 @@ func messageHandler(w *astilectron.Window, m bootstrap.MessageIn) (payload inter
 	return
 }
 
-func encrypt(w *astilectron.Window, f File, key []byte) (err error) {
+func encrypt(w *astilectron.Window, f file, key []byte) (err error) {
 
 	// Skips over directory
 	if f.isDir {
@@ -332,7 +332,7 @@ func encrypt(w *astilectron.Window, f File, key []byte) (err error) {
 	return nil
 }
 
-func decrypt(w *astilectron.Window, f File, key []byte) (err error) {
+func decrypt(w *astilectron.Window, f file, key []byte) (err error) {
 
 	// Skips over directory
 	if f.isDir {

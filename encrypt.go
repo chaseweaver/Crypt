@@ -49,7 +49,7 @@ func decryptAESFile(code, key []byte) ([]byte, error) {
 
 	// Returns if the ciphertext is too short
 	if len(code) < aes.BlockSize {
-		return nil, errors.New("Ciphertext is too short!")
+		return nil, errors.New("ciphertext is too short")
 	}
 
 	iv := code[:aes.BlockSize]
@@ -93,7 +93,7 @@ func decryptMessage(ext string, key []byte) (string, error) {
 
 	// Returns if the ciphertext is too short
 	if len(ct) < aes.BlockSize {
-		return "", errors.New("Ciphertext is too short!")
+		return "", errors.New("ciphertext is too short")
 	}
 
 	iv := ct[:aes.BlockSize]
