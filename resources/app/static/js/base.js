@@ -2,8 +2,29 @@ document.addEventListener('astilectron-ready', function() {
 	let helpText = 'Crypt is an open-source AES-256 file encryption program.\n\n1. Select File / Directory\n2. Choose options\n3. Enter password\n4. Encrypt / Decrypt\n\ngithub.com/chaseweaver/Crypt\nchase.weaver34@gmail.com\n\n';
 	document.getElementById('console-box').innerHTML = helpText;
 
+	let max = 0;
 	astilectron.onMessage(function(message) {
-		document.getElementById('console-box').innerHTML += message.name + '\n\n';
+		let elem = document.getElementById('bar'); 
+
+		if (message.name === 'count') {
+			max = message.payload;
+			elem.innerHTML = '0%';
+			elem.style.width = 0 + '%';
+		} else if (message.name === "progress") {
+			let prog = parseInt((message.payload / max) * 100);
+			elem.innerHTML = prog + '%'
+			elem.style.width = prog + '%'; 
+
+			if (prog >= 100) {
+				elem.innerHTML = '100%';
+			}
+		} else {
+			document.getElementById('console-box').innerHTML += message.name + '\n\n';
+		}
+
+		if (message.name === 'stop') {
+			elem.innerHTML = 'Complete : ' + message.payload;
+		}
 	});
 
 	document.getElementById('close').addEventListener('click', function() {
@@ -20,6 +41,7 @@ document.addEventListener('astilectron-ready', function() {
 	});
 
 	document.getElementById('file').addEventListener('click', function() {
+		max = 0;
 		astilectron.showOpenDialog({properties: ['openFile', 'multiSelections'],
 			title: 'File(s) to Encrypt/Decrypt'}, function(paths) {
 				astilectron.sendMessage({name: 'open-file', payload: paths});
@@ -27,6 +49,7 @@ document.addEventListener('astilectron-ready', function() {
 	});
 
 	document.getElementById('dir').addEventListener('click', function() {
+		max = 0;
 		astilectron.showOpenDialog({properties: ['openDirectory', 'singleSelection'],
 			title: 'Dir(s) to Encrypt/Decrypt'}, function(paths) {
 				astilectron.sendMessage({name: 'open-dir', payload: paths[0]});

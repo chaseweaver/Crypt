@@ -8,8 +8,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
+	"time"
 
 	astilectron "github.com/asticode/go-astilectron"
 	bootstrap "github.com/asticode/go-astilectron-bootstrap"
@@ -21,7 +21,9 @@ var (
 	w             *astilectron.Window
 	appName       string
 	builtAt       string
+	fcount        int
 	exp           []file
+	progress      = 0
 	createCopy    = false
 	encryptNames  = true
 	keepExtension = true
@@ -62,7 +64,7 @@ func main() {
 				HasShadow:       astilectron.PtrBool(false),
 				Fullscreenable:  astilectron.PtrBool(false),
 				Center:          astilectron.PtrBool(true),
-				Height:          astilectron.PtrInt(630),
+				Height:          astilectron.PtrInt(675),
 				Width:           astilectron.PtrInt(325),
 			},
 		}},
@@ -90,22 +92,38 @@ func messageHandler(w *astilectron.Window, m bootstrap.MessageIn) (payload inter
 		// Make new struct array
 		exp = make([]file, len(path))
 
-		// Split file, directory, extension
-		re := regexp.MustCompile(`(?m)[^/]+$`)
-		reg := regexp.MustCompile(`(?m)[^.]+$`)
+		// Send file count size
+		progress = 0
+		payload = len(path)
+		if err := bootstrap.SendMessage(w, "count", payload); err != nil {
+			payload = err.Error()
+		}
 
-		for i := 0; i < len(exp); i++ {
-			exp[i].fileDir = path[i][:re.FindStringIndex(path[i])[0]]
-			exp[i].fileName = path[i][re.FindStringIndex(path[i])[0]:]
-			exp[i].fileExt = path[i][reg.FindStringIndex(path[i])[0]:]
-			exp[i].path = path[i]
+		if logOutput {
+			if err := bootstrap.SendMessage(w, fmt.Sprintf("File Count: %v", len(path)), nil); err != nil {
+				payload = err.Error()
+			}
+		}
 
-			if len(exp[i].fileExt) == 0 {
-				exp[i].hasExtension = false
+		for i := 0; i < len(path); i++ {
+			p := path[i]
+			nf := file{
+				fileDir:  filepath.Dir(p) + "/",
+				fileName: filepath.Base(p),
+				fileExt:  filepath.Ext(p),
+				path:     p,
 			}
 
+			if len(nf.fileExt) == 0 {
+				nf.hasExtension = false
+			} else {
+				nf.hasExtension = true
+			}
+
+			exp = append(exp, nf)
+
 			if logOutput {
-				if err := bootstrap.SendMessage(w, fmt.Sprintf("Loaded: %v", exp[i].path), nil); err != nil {
+				if err := bootstrap.SendMessage(w, fmt.Sprintf("Loaded: %v", nf.path), nil); err != nil {
 					payload = err.Error()
 				}
 			}
@@ -120,23 +138,43 @@ func messageHandler(w *astilectron.Window, m bootstrap.MessageIn) (payload inter
 			return
 		}
 
+		fcount = 0
+		progress = 0
 		exp = make([]file, len(path))
 		if err := filepath.Walk(path, func(p string, f os.FileInfo, err error) error {
-			re := regexp.MustCompile(`(?m)[^/]+$`)
-			reg := regexp.MustCompile(`(?m)[^.]+$`)
 
+			fcount++
 			nf := file{
-				fileDir:  p[:re.FindStringIndex(p)[0]],
-				fileName: p[re.FindStringIndex(p)[0]:],
-				fileExt:  p[reg.FindStringIndex(p)[0]:],
+				fileDir:  filepath.Dir(p) + "/",
+				fileName: filepath.Base(p),
+				fileExt:  filepath.Ext(p),
 				path:     p,
 				isDir:    f.IsDir(),
 			}
 
+			if len(nf.fileExt) == 0 {
+				nf.hasExtension = false
+			} else {
+				nf.hasExtension = true
+			}
+
 			exp = append(exp, nf)
+
 			return nil
 		}); err != nil {
 			payload = err.Error()
+		}
+
+		// Send file count size
+		payload = fcount
+		if err := bootstrap.SendMessage(w, "count", payload); err != nil {
+			payload = err.Error()
+		}
+
+		if logOutput {
+			if err := bootstrap.SendMessage(w, fmt.Sprintf("File Count: %v", fcount), nil); err != nil {
+				payload = err.Error()
+			}
 		}
 
 		for i := 0; i < len(exp); i++ {
@@ -158,11 +196,18 @@ func messageHandler(w *astilectron.Window, m bootstrap.MessageIn) (payload inter
 
 		// Hash key from recieved password
 		key := []byte(createHash(pwd))
+		start := time.Now()
 
 		// Loop through each file
 		for i := 0; i < len(exp); i++ {
 			err := encrypt(w, exp[i], key)
 			if err != nil {
+				payload = err.Error()
+			}
+
+			// Send progress
+			progress++
+			if err := bootstrap.SendMessage(w, "progress", progress); err != nil {
 				payload = err.Error()
 			}
 		}
@@ -190,8 +235,19 @@ func messageHandler(w *astilectron.Window, m bootstrap.MessageIn) (payload inter
 
 					// Rename directory
 					os.Rename(exp[i].path, exp[i].fileDir+name)
+
+					// Send progress
+					progress++
+					if err := bootstrap.SendMessage(w, "progress", progress); err != nil {
+						payload = err.Error()
+					}
 				}
 			}
+		}
+
+		elapsed := time.Since(start)
+		if err = bootstrap.SendMessage(w, "stop", elapsed.String()); err != nil {
+			payload = err.Error()
 		}
 
 	case "decrypt":
@@ -205,11 +261,18 @@ func messageHandler(w *astilectron.Window, m bootstrap.MessageIn) (payload inter
 
 		// Hash key from recieved password
 		key := []byte(createHash(pwd))
+		start := time.Now()
 
 		// Loop through each file
 		for i := 0; i < len(exp); i++ {
 			err := decrypt(w, exp[i], key)
 			if err != nil {
+				payload = err.Error()
+			}
+
+			// Send progress
+			progress++
+			if err := bootstrap.SendMessage(w, "progress", progress); err != nil {
 				payload = err.Error()
 			}
 		}
@@ -237,8 +300,19 @@ func messageHandler(w *astilectron.Window, m bootstrap.MessageIn) (payload inter
 
 					// Rename directory
 					os.Rename(exp[i].path, exp[i].fileDir+name)
+
+					// Send progress
+					progress++
+					if err := bootstrap.SendMessage(w, "progress", progress); err != nil {
+						payload = err.Error()
+					}
 				}
 			}
+		}
+
+		elapsed := time.Since(start)
+		if err = bootstrap.SendMessage(w, "stop", elapsed.String()); err != nil {
+			payload = err.Error()
 		}
 
 	case "createCopyChecked":
@@ -314,7 +388,7 @@ func encrypt(w *astilectron.Window, f file, key []byte) (err error) {
 	// Option to keep original extension
 	fname := f.fileDir + name
 	if encryptNames && keepExtension && f.hasExtension {
-		fname = f.fileDir + name + "." + f.fileExt
+		fname = f.fileDir + name + f.fileExt
 	}
 
 	// Writes file to original directory with encrypted name
@@ -353,11 +427,7 @@ func decrypt(w *astilectron.Window, f file, key []byte) (err error) {
 
 	// Decrypts file name with same hashed password,
 	// will be the original unless renamed, option to remove extension
-	name := f.fileName
-	if f.hasExtension {
-		re := regexp.MustCompile(`(?m)[^.]+$`)
-		name = f.fileName[:re.FindStringIndex(f.fileName)[0]]
-	}
+	name := f.fileName[:len(filepath.Ext(f.fileName))]
 
 	if name, err = decryptMessage(f.fileName, key); err != nil {
 		return err
