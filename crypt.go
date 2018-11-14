@@ -372,6 +372,17 @@ func encrypt(w *astilectron.Window, f file, key []byte) (err error) {
 		}
 	}
 
+	// Option to keep original extension
+	fname := f.fileDir + name
+	if encryptNames && keepExtension && f.hasExtension {
+		fname = f.fileDir + name + f.fileExt
+	}
+
+	// Writes file to original directory with encrypted name
+	if err = ioutil.WriteFile(fname, data, 0644); err != nil {
+		return err
+	}
+
 	// Deletes original file if a copy is not requested
 	if !createCopy {
 		if err = os.Remove(f.fileDir + f.fileName); err != nil {
@@ -383,17 +394,6 @@ func encrypt(w *astilectron.Window, f file, key []byte) (err error) {
 				return err
 			}
 		}
-	}
-
-	// Option to keep original extension
-	fname := f.fileDir + name
-	if encryptNames && keepExtension && f.hasExtension {
-		fname = f.fileDir + name + f.fileExt
-	}
-
-	// Writes file to original directory with encrypted name
-	if err = ioutil.WriteFile(fname, data, 0644); err != nil {
-		return err
 	}
 
 	// Log results
@@ -433,6 +433,11 @@ func decrypt(w *astilectron.Window, f file, key []byte) (err error) {
 		return err
 	}
 
+	// Writes file to original directory with decrypted name
+	if err = ioutil.WriteFile(f.fileDir+name, data, 0644); err != nil {
+		return err
+	}
+
 	// Deletes original file if a copy is not requested
 	if !createCopy {
 		if err = os.Remove(f.fileDir + f.fileName); err != nil {
@@ -444,11 +449,6 @@ func decrypt(w *astilectron.Window, f file, key []byte) (err error) {
 				return err
 			}
 		}
-	}
-
-	// Writes file to original directory with decrypted name
-	if err = ioutil.WriteFile(f.fileDir+name, data, 0644); err != nil {
-		return err
 	}
 
 	// Log results
